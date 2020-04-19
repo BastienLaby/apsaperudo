@@ -1,38 +1,93 @@
 from flask import request
-from flask_socketio import join_room, leave_room, rooms, emit, send
+from flask_socketio import join_room, leave_room, rooms
+from faker import Faker
 
 from apsaperudo.application import app
+from apsaperudo.api.lobby import (
+    create_pending_player,
+    get_pending_players_names,
+    rename_pending_player,
+    delete_pending_player
+)
+from apsaperudo.api.game import get_games
 from apsaperudo.io.messages import message_to_player, message_to_game
 
 socketio = app.extensions["socketio"]
 
 
-@socketio.on("connect", namespace="/apsaperudo")
+class PseudoGenerationAttemptsExceeded(Exception):
+    pass
+
+
+_NAMESPACE = "/apsaperudo"
+
+
+@socketio.on("connect", namespace=_NAMESPACE)
 def connect_handler():
     """
     Connection should be made when the client enters the front page.
     """
-    print("Connected")
+
+    fake = Faker()
+    attempts = 1000
+    existing_players = get_pending_players_names()
+    for i in range(attempts):
+        username = fake.name()
+        if username not in existing_players:
+            break
+    else:
+        raise PseudoGenerationAttemptsExceeded()
+
+    create_pending_player(request.sid, username)
+
     message_to_player("connection_ok", {
         "message": "Connected !",
-        "username": "Michel"
+        "username": username
     })
     message_to_player("games_updated", {
         "message": "Games list updated.",
-        "games": ["game01", "game02"]
+        "games": get_games()
     })
 
 
-@socketio.on("disconnect", namespace="/apsaperudo")
+@socketio.on("disconnect", namespace=_NAMESPACE)
 def disconnect_handler():
     """
     Received when the socket is removed or if the client closes the tab.
     """
     # TODO: remove the client from game and game room
-    pass
+
+    user_rooms = rooms()
+    username = delete_pending_player(request.sid)
+    for room in user_rooms:
+        message_to_game("player_leaved", {
+                "message": f"#{username} left the game"
+            }, room
+        )
 
 
-@socketio.on("create_game", namespace="/apsaperudo")
+@socketio.on("change_username", namespace=_NAMESPACE)
+def on_username_change(data):
+    """
+    Check if a pending player with the same name already exists.
+    Return a "already_taken_username" event if so.
+    Else, rename the player and return a "username_changed" event.
+    """
+    assert "new_username" in data
+    new_username = data["new_username"]
+    if new_username in get_pending_players_names():
+        message_to_player("already_taken_username", {
+            "message": f"Username #{new_username} already taken."
+        })
+    else:
+        rename_pending_player(request.sid, new_username)
+        message_to_player("username_changed", {
+            "message": f"Username changed to #{new_username}.",
+            "username": new_username
+        })
+
+
+@socketio.on("create_game", namespace=_NAMESPACE)
 def on_game_create(data):
     """
     Create a new game with the given name (duplicates names are allowed for now).
@@ -42,41 +97,46 @@ def on_game_create(data):
     on_game_join(data)
 
 
-@socketio.on("join_game", namespace="/apsaperudo")
+@socketio.on("join_game", namespace=_NAMESPACE)
 def on_game_join(data):
     assert all(i in data for i in ("game_id", "username"))
+    username = data["username"]
+    game_id = data["game_id"]
+
+    # disconnect from every rooms
     for room in rooms()[1:]:
-        on_game_leave({"game_id": room, "username": data["username"]})
+        on_game_leave({"game_id": room, "username": username})
+
+    # join the new game
     message_to_player("game_joined", {
-        "message": f'You entered #{data["game_id"]}',
-        "game_id": data["game_id"]
+        "message": f"You entered #{game_id}.",
+        "game_id": game_id
     })
-    message_to_game(
-        "player_joined", {
-            "message": f'#{data["username"]} entered the game'
-        },
-        data["game_id"]
+    message_to_game("player_joined", {
+            "message": f"#{username} entered the game."
+        }, game_id
     )
-    join_room(data["game_id"])
+    join_room(game_id)
 
 
-@socketio.on("leave_game", namespace="/apsaperudo")
+@socketio.on("leave_game", namespace=_NAMESPACE)
 def on_game_leave(data):
     assert all(i in data for i in ("game_id", "username"))
-    leave_room(data["game_id"])
+    username = data["username"]
+    game_id = data["game_id"]
+
+    leave_room(game_id)
     message_to_player("game_leaved", {
-        "message": f'You left #{data["game_id"]}',
-        "game_id": data["game_id"]
+        "message": f"You left #{game_id}",
+        "game_id": game_id
     })
-    message_to_game(
-        "player_leaved", {
-            "message": f'#{data["username"]} left the game'
-        },
-        data["game_id"]
+    message_to_game("player_leaved", {
+            "message": f"#{username} left the game"
+        }, data["game_id"]
     )
 
 
-@socketio.on("start_game", namespace="/apsaperudo")
+@socketio.on("start_game", namespace=_NAMESPACE)
 def on_game_start(data):
     """
     Start the game with the current registered players.

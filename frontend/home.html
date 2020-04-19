@@ -5,26 +5,43 @@
 <head>
     <script src="//code.jquery.com/jquery-1.12.4.min.js" crossorigin="anonymous"></script>
     <script src="//cdnjs.cloudflare.com/ajax/libs/socket.io/2.2.0/socket.io.js" crossorigin="anonymous"></script>
-    <script src="{{ url_for('static', filename='sockets.js') }}"></script>
-    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='style.css') }}">
+    <script src="{{ url_for('static', filename='home.js') }}"></script>
+    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='home.css') }}">
 </head>
 
 <body>
 
-    <p>Your Name : <b id="username"></b></p>
-    <div id="player_game">
-        <p>Your Game : <b id="player_game_name"></b></p>
-        <p>Players in your room :</p>
-        <p id ="player_game_players"></p>
+    <h1>Apsaperudo</h1>
+
+    <div class="section" id="profile">
+        <h1><span>Profile</span></h1>
+        <p>Name : <b id="username"></b></p>
+        <form id="change_username" method="POST" action='#'>
+            <input type="text" name="new_username" id="new_username" placeholder="myName">
+            <input type="submit" value="Change username">
+        </form>
     </div>
 
-    <div id="games">
-        <p>Available Games (click to join):</p>
-        <ul id="games_list"></ul>
-    </div>
+    <!-- <div class="section" id="games">
+        <h1><span>Games : </span></h1>
 
-    <p>Logs :</p>
-    <p id="logs"></p>
+        <p>Your game : <b id="player_game_name"></b> <span id="current_game_players"></span></p>
+
+        <p><b>Other games </b>(click to join):</p>
+        <div id="games_list"></div>
+
+        <p><b>Game creation :</b></p>
+        <form id="new_game" method="POST" action='#'>
+            <input type="text" name="new_game_name" id="new_game_name" placeholder="myGame">
+            <input type="submit" value="Create New Game">
+        </form>
+
+    </div>!-->
+
+    <div class="section">
+        <h1><span>Logs : </span></h1>
+        <p id="logs"></p>
+    </div>
 
 </body>
 

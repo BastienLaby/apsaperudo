@@ -41,4 +41,5 @@ from apsaperudo.sockets import *
 from apsaperudo.database import models
 
 if __name__ == '__main__':
+
     app.extensions["socketio"].run(app)

@@ -1,0 +1,33 @@
+<!DOCTYPE HTML>
+
+<html>
+
+<head>
+    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='home.css') }}">
+</head>
+
+<body>
+
+    <h1>database</h1>
+
+    <div class="section" id="games">
+        <h1><span>Games</span></h1>
+        <ul>
+            {% for game in data.games %}
+            <li>{{ game }}</li>
+            {% endfor %}
+        </ul>
+    </div>
+
+    <div class="section" id="game_players">
+        <h1><span>Game Players</span></h1>
+        <ul>
+        {% for player in data.players %}
+            <li>{{ player.name }} ({{ player.id }})</li>
+        {% endfor %}
+        </ul>
+    </div>
+
+</body>
+
+</html>
