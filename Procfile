@@ -1,0 +1,1 @@
+web: gunicorn --worker-class eventlet --chdir backend apsaperudo.application:app

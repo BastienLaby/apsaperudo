@@ -1,0 +1,31 @@
+<!DOCTYPE HTML>
+
+<html>
+
+<head>
+    <script src="//code.jquery.com/jquery-1.12.4.min.js" crossorigin="anonymous"></script>
+    <script src="//cdnjs.cloudflare.com/ajax/libs/socket.io/2.2.0/socket.io.js" crossorigin="anonymous"></script>
+    <script src="{{ url_for('static', filename='sockets.js') }}"></script>
+    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='style.css') }}">
+</head>
+
+<body>
+
+    <p>Your Name : <b id="username"></b></p>
+    <div id="player_game">
+        <p>Your Game : <b id="player_game_name"></b></p>
+        <p>Players in your room :</p>
+        <p id ="player_game_players"></p>
+    </div>
+
+    <div id="games">
+        <p>Available Games (click to join):</p>
+        <ul id="games_list"></ul>
+    </div>
+
+    <p>Logs :</p>
+    <p id="logs"></p>
+
+</body>
+
+</html>

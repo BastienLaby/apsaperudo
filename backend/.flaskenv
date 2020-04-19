@@ -1,0 +1,2 @@
+FLASK_APP=apsaperudo/application.py
+FLASK_ENV=development

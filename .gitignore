@@ -1,0 +1,13 @@
+*.pyc
+
+# venv
+
+*/Include/**
+*/Lib/**
+*/Scripts/**
+*/app.db
+pyvenv.cfg
+*.code-workspace
+.vscode/**
+**/__pycache__
+requirements.txt
