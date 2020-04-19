@@ -9,9 +9,9 @@ from apsaperudo.api.lobby import (
     rename_pending_player,
     delete_pending_player,
     create_pending_game,
-    delete_pending_game,
-    get_games_names
+    delete_pending_game
 )
+from apsaperudo.api.game import add_player_to_game, remove_player_from_game, get_games_names
 from apsaperudo.io.messages import (
     message_to_player, message_to_game, message_to_all
 )
@@ -97,7 +97,7 @@ def on_game_create(data):
     If a game with the same name (pending or not) already exists, return a "already_taken_gamename" event.
     Else, create the game, return a "game_created" event, and make the player join it.
     """
-    assert "game_name" in data
+    assert all(i in data for i in ("game_name", "username"))
     game_name = data["game_name"]
     if game_name in get_games_names():
         message_to_player("already_taken_gamename", {
@@ -112,45 +112,51 @@ def on_game_create(data):
             "message": "Games list updated.",
             "games": get_games_names()
         })
-        # on_game_join(data)
+        on_game_join(data)
 
 
 @socketio.on("join_game", namespace=_NAMESPACE)
 def on_game_join(data):
-    assert all(i in data for i in ("game_id", "username"))
+    assert all(i in data for i in ("game_name", "username"))
     username = data["username"]
-    game_id = data["game_id"]
+    game_name = data["game_name"]
 
     # disconnect from every rooms
     for room in rooms()[1:]:
-        on_game_leave({"game_id": room, "username": username})
+        on_game_leave({"game_name": room, "username": username})
 
     # join the new game
     message_to_player("game_joined", {
-        "message": f"You entered #{game_id}.",
-        "game_id": game_id
+        "message": f"You entered #{game_name}.",
+        "game_name": game_name
     })
     message_to_game("player_joined", {
             "message": f"#{username} entered the game."
-        }, game_id
+        }, game_name
     )
-    join_room(game_id)
+    join_room(game_name)
+    add_player_to_game(game_name, request.sid)
 
 
 @socketio.on("leave_game", namespace=_NAMESPACE)
 def on_game_leave(data):
-    assert all(i in data for i in ("game_id", "username"))
+    """
+    Leave the given game.
+    If the game is empty, delete it.
+    """
+    assert all(i in data for i in ("game_name", "username"))
     username = data["username"]
-    game_id = data["game_id"]
+    game_name = data["game_name"]
 
-    leave_room(game_id)
+
+    leave_room(game_name)
     message_to_player("game_leaved", {
-        "message": f"You left #{game_id}",
-        "game_id": game_id
+        "message": f"You left #{game_name}",
+        "game_name": game_name
     })
     message_to_game("player_leaved", {
             "message": f"#{username} left the game"
-        }, data["game_id"]
+        }, data["game_name"]
     )
 
 

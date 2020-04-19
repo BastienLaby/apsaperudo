@@ -25,7 +25,7 @@
         <h1><span>Game Players</span></h1>
         <ul>
         {% for player in data.players %}
-            <li>{{ player.name }} ({{ player.id }})</li>
+            <li>{{ player.name }} (in game #{{ player.game }}) id={{ player.id }}</li>
         {% endfor %}
         </ul>
     </div>
@@ -33,3 +33,5 @@
 </body>
 
 </html>
+
+

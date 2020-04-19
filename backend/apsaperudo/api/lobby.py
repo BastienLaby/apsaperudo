@@ -1,6 +1,7 @@
 
-from apsaperudo.database.models import GamePlayer, Game
 from apsaperudo.extensions import db
+from apsaperudo.database.models import GamePlayer, Game
+from apsaperudo.api.game import get_games_names
 
 
 def create_pending_player(player_id, player_name):
@@ -17,6 +18,11 @@ def get_pending_players_ids():
 
 def get_pending_players_names():
     return [i.name for i in GamePlayer.query.filter(GamePlayer.pending == True)]
+
+
+def get_pending_players_games():
+    games_ids = [i.game_id for i in GamePlayer.query.filter(GamePlayer.pending == True)]
+    return games_ids
 
 
 def rename_pending_player(player_id, new_name):
@@ -50,7 +56,3 @@ def delete_pending_game(game_name):
     db.session.delete(game)
     db.session.commit()
     return game.name
-
-
-def get_games_names():
-    return [i.name for i in Game.query.filter()]

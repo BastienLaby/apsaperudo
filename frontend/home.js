@@ -36,7 +36,7 @@ $(document).ready(function () {
         }
 
         if (msg.message_type == 'game_joined') {
-            $("#player_game_name").text(msg.game_id);
+            $("#player_game_name").text(msg.game_name);
         }
 
         $('#logs').append(`<br>[${msg.message_type}] : ${msg.message}`);
@@ -54,6 +54,7 @@ $(document).ready(function () {
 
     $('form#new_game').submit(function (event) {
         socketio.emit('create_game', {
+            username: $('#username').val(),
             game_name: $('#new_game_name').val()
         });
         return false;
@@ -61,7 +62,7 @@ $(document).ready(function () {
 
     $('#games').on('click', '.join_room', function (event) {
         socketio.emit('join_game', {
-            game_id: $(event.target).attr('id'),
+            game_name: $(event.target).attr('id'),
             username: $('#username').text()
         });
     });
