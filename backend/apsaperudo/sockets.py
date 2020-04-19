@@ -7,19 +7,22 @@ from apsaperudo.api.lobby import (
     create_pending_player,
     get_pending_players_names,
     rename_pending_player,
-    delete_pending_player
+    delete_pending_player,
+    create_pending_game,
+    delete_pending_game,
+    get_games_names
 )
-from apsaperudo.api.game import get_games
-from apsaperudo.io.messages import message_to_player, message_to_game
+from apsaperudo.io.messages import (
+    message_to_player, message_to_game, message_to_all
+)
+
 
 socketio = app.extensions["socketio"]
+_NAMESPACE = "/apsaperudo"
 
 
 class PseudoGenerationAttemptsExceeded(Exception):
     pass
-
-
-_NAMESPACE = "/apsaperudo"
 
 
 @socketio.on("connect", namespace=_NAMESPACE)
@@ -46,7 +49,7 @@ def connect_handler():
     })
     message_to_player("games_updated", {
         "message": "Games list updated.",
-        "games": get_games()
+        "games": get_games_names()
     })
 
 
@@ -77,7 +80,7 @@ def on_username_change(data):
     new_username = data["new_username"]
     if new_username in get_pending_players_names():
         message_to_player("already_taken_username", {
-            "message": f"Username #{new_username} already taken."
+            "message": f"Username \"{new_username}\" already taken."
         })
     else:
         rename_pending_player(request.sid, new_username)
@@ -90,11 +93,26 @@ def on_username_change(data):
 @socketio.on("create_game", namespace=_NAMESPACE)
 def on_game_create(data):
     """
-    Create a new game with the given name (duplicates names are allowed for now).
-    Create a new player for the game creator.
+    Create a new game with the given name.
+    If a game with the same name (pending or not) already exists, return a "already_taken_gamename" event.
+    Else, create the game, return a "game_created" event, and make the player join it.
     """
-    # TODO: create game
-    on_game_join(data)
+    assert "game_name" in data
+    game_name = data["game_name"]
+    if game_name in get_games_names():
+        message_to_player("already_taken_gamename", {
+            "message": f"Game name \"{game_name}\" already taken."
+        })
+    else:
+        create_pending_game(game_name)
+        message_to_player("game_created", {
+            "message": f"Game #{game_name} created."
+        })
+        message_to_all("games_updated", {
+            "message": "Games list updated.",
+            "games": get_games_names()
+        })
+        # on_game_join(data)
 
 
 @socketio.on("join_game", namespace=_NAMESPACE)

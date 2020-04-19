@@ -1,5 +1,5 @@
 
-from apsaperudo.database.models import GamePlayer
+from apsaperudo.database.models import GamePlayer, Game
 from apsaperudo.extensions import db
 
 
@@ -29,8 +29,28 @@ def rename_pending_player(player_id, new_name):
 
 
 def delete_pending_player(player_id):
-    # assert player_id in get_pending_players_ids()
+    assert player_id in get_pending_players_ids()
     player = GamePlayer.query.get(player_id)
     db.session.delete(player)
     db.session.commit()
     return player.name  # still valid after .remove() ?
+
+
+def create_pending_game(game_name):
+    assert game_name not in get_games_names()
+    game = Game(name=game_name, pending=True)
+    db.session.add(game)
+    db.session.commit()
+    return game.id
+
+
+def delete_pending_game(game_name):
+    assert game_name in get_games_names()
+    game = Game.query.get(Game.name == game_name)
+    db.session.delete(game)
+    db.session.commit()
+    return game.name
+
+
+def get_games_names():
+    return [i.name for i in Game.query.filter()]

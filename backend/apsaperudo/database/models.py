@@ -4,10 +4,12 @@ from apsaperudo.extensions import db
 def clear_db():
     Game.query.delete()
     GamePlayer.query.delete()
+    db.session.commit()
 
 
 class Game(db.Model):
-    id = db.Column(db.String(64), primary_key=True)
+    id = db.Column(db.Integer(), primary_key=True)
+    name = db.Column(db.String(64))
     pending = db.Column(db.Boolean())
 
     def __repr__(self):

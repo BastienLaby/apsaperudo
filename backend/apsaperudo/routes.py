@@ -1,8 +1,9 @@
-from flask import render_template, request
+from flask import render_template, request, redirect
 
 from apsaperudo.application import app
 from apsaperudo.api.game import get_games
 from apsaperudo.api.lobby import get_pending_players_ids, get_pending_players_names
+from apsaperudo.database.models import clear_db
 
 
 @app.route("/")
@@ -26,3 +27,9 @@ def db():
         ]
     }
     return render_template("db.html", data=data)
+
+
+@app.route("/clear")
+def clear():
+    clear_db()
+    return redirect('/db')

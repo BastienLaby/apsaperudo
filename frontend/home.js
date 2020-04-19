@@ -26,7 +26,7 @@ $(document).ready(function () {
             if (msg.games.length > 0) {
                 var gameList = '<ul>';
                 for (i = 0; i < msg.games.length; i++) {
-                    lists += `<li><a id="${msg.games[i]}" class="join_room" href="#">${msg.games[i]}</li>`
+                    gameList += `<li><a id="${msg.games[i]}" class="join_room" href="#">${msg.games[i]}</li>`
                 }
                 gameList += '</ul>';
                 $("#games_list").html(gameList);
@@ -46,9 +46,15 @@ $(document).ready(function () {
     // client to server events
 
     $('form#change_username').submit(function (event) {
-        console.log("change_username");
         socketio.emit('change_username', {
             new_username: $('#new_username').val()
+        });
+        return false;
+    });
+
+    $('form#new_game').submit(function (event) {
+        socketio.emit('create_game', {
+            game_name: $('#new_game_name').val()
         });
         return false;
     });
