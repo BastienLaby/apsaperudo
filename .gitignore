@@ -10,3 +10,4 @@ pyvenv.cfg
 *.code-workspace
 .vscode/**
 **/__pycache__
+node_modules

@@ -1,0 +1,18 @@
+TODO
+
+
+BACKEND
+
+- create a layer between sockets and api (!= "engine" which is the game solver)
+    - custom engine classes (Game, Player, etc)
+    - class objects IO for better templates
+
+- clean game api
+
+- Split sockets :
+    - lobby sockets
+    - game sockets
+
+
+FRONTEND
+

@@ -12,6 +12,8 @@
 
     <a href="clear">clear</a>
 
+    <div id="game_container"></div>
+
     <div class="section" id="games">
         <h1><span>Games</span></h1>
         <ul>
@@ -25,10 +27,17 @@
         <h1><span>Game Players</span></h1>
         <ul>
         {% for player in data.players %}
-            <li>{{ player.name }} (in game #{{ player.game }}) id={{ player.id }}</li>
+            <li>{{ player.id }} (in game #{{ player.game }})</li>
         {% endfor %}
         </ul>
     </div>
+
+    <!-- Note: when deploying, replace "development.js" with "production.min.js". -->
+    <script src="https://unpkg.com/react@16/umd/react.development.js" crossorigin></script>
+    <script src="https://unpkg.com/react-dom@16/umd/react-dom.development.js" crossorigin></script>
+
+    <!-- Load our React component. -->
+    <script src="{{ url_for('static', filename='game_container.js') }}"></script>
 
 </body>
 

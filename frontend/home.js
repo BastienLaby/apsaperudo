@@ -15,11 +15,11 @@ $(document).ready(function () {
         console.log(msg);
 
         if (msg.message_type == 'connection_ok') {
-            changeUsername(msg.username);
+            changeUsername(msg.player_id);
         }
 
-        if (msg.message_type == 'username_changed') {
-            changeUsername(msg.username);
+        if (msg.message_type == 'player_id_changed') {
+            changeUsername(msg.player_id);
         }
 
         if (msg.message_type == 'games_updated') {
@@ -46,24 +46,22 @@ $(document).ready(function () {
     // client to server events
 
     $('form#change_username').submit(function (event) {
-        socketio.emit('change_username', {
-            new_username: $('#new_username').val()
+        socketio.emit('change_player_id', {
+            new_player_id: $('#new_username').val()
         });
         return false;
     });
 
     $('form#new_game').submit(function (event) {
         socketio.emit('create_game', {
-            username: $('#username').val(),
-            game_name: $('#new_game_name').val()
+            game_id: $('#new_game_name').val()
         });
         return false;
     });
 
     $('#games').on('click', '.join_room', function (event) {
         socketio.emit('join_game', {
-            game_name: $(event.target).attr('id'),
-            username: $('#username').text()
+            game_id: $(event.target).attr('id')
         });
     });
 
